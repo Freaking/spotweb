@@ -7,7 +7,7 @@ try {
 	 * working directory to a directory the script is in
 	 */
 	if (@!file_exists(getcwd() . '/' . basename($argv[0]))) {
-		chdir(__DIR__);
+		chdir(dirname(__FILE__));
 	} # if
 
 	require_once "lib/SpotClassAutoload.php";
@@ -57,7 +57,7 @@ try {
 	 */
 	if (SpotCommandline::get('reset-filters')) {
 		echo "Resetting users' filters to the default" . PHP_EOL;
-		$spotUpgrader->resetUserGroupMembership();
+		$spotUpgrader->resetFilters();
 		echo "Reset of users' filters done" . PHP_EOL;
 	} # if
 
