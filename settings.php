@@ -110,13 +110,13 @@ if (file_exists('ownsettings.php')) { include_once('ownsettings.php'); }	# <== d
 if (!isset($settings['quicklinks'])) {
 	$settings['quicklinks'] = Array();
 	$settings['quicklinks'][] = Array('Reset filters', "home", "?search[tree]=&amp;search[unfiltered]=true", "", Array(SpotSecurity::spotsec_view_spots_index, ''), null);
-	$settings['quicklinks'][] = Array('Nieuw', "today", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=New:0", "", Array(SpotSecurity::spotsec_keep_own_seenlist, ''), 'count_newspots');
+	$settings['quicklinks'][] = Array('New', "today", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=New:0", "", Array(SpotSecurity::spotsec_keep_own_seenlist, ''), 'count_newspots');
 	$settings['quicklinks'][] = Array('Watchlist', "fav", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=Watch:0", "", Array(SpotSecurity::spotsec_keep_own_watchlist, ''), 'keep_watchlist');
-	$settings['quicklinks'][] = Array('Gedownload', "download", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=Downloaded:0", "", Array(SpotSecurity::spotsec_keep_own_downloadlist, ''), 'keep_downloadlist');
-	$settings['quicklinks'][] = Array('Recent bekeken', "eye", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=Seen:0", "", Array(SpotSecurity::spotsec_keep_own_seenlist, ''), 'keep_seenlist');
-	$settings['quicklinks'][] = Array('Mijn spots', "fav", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=MyPostedSpots:0", "", Array(SpotSecurity::spotsec_post_spot, ''), null);
-	$settings['quicklinks'][] = Array('Statistieken', "stats", "?page=statistics", "", Array(SpotSecurity::spotsec_view_statistics, ''), null);
-	$settings['quicklinks'][] = Array('Documentatie', "help", "https://github.com/spotweb/spotweb/wiki", "external", Array(SpotSecurity::spotsec_view_spots_index, ''), null);
+	$settings['quicklinks'][] = Array('Downloaded', "download", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=Downloaded:0", "", Array(SpotSecurity::spotsec_keep_own_downloadlist, ''), 'keep_downloadlist');
+	$settings['quicklinks'][] = Array('Recently viewed', "eye", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=Seen:0", "", Array(SpotSecurity::spotsec_keep_own_seenlist, ''), 'keep_seenlist');
+	$settings['quicklinks'][] = Array('My spots', "fav", "?search[tree]=&amp;search[unfiltered]=true&amp;search[value][]=MyPostedSpots:0", "", Array(SpotSecurity::spotsec_post_spot, ''), null);
+	$settings['quicklinks'][] = Array('Statistics', "stats", "?page=statistics", "", Array(SpotSecurity::spotsec_view_statistics, ''), null);
+	$settings['quicklinks'][] = Array('Documentation', "help", "https://github.com/spotweb/spotweb/wiki", "external", Array(SpotSecurity::spotsec_view_spots_index, ''), null);
 } # if isset
 
 #
@@ -137,7 +137,6 @@ if (($settings['templates']['autodetect']) &&
 } else {
 	$settings['tpl_name'] = $settings['templates']['default'];
 } # else
-$settings['tpl_name'] = str_replace('templates/', '', $settings['tpl_name']);
 
 # Als de OpenSSL module geladen is, moet de openssl_cnf_path naar een 
 # leesbare configuratie file wijzen
@@ -151,42 +150,39 @@ if (substr($settings['spotweburl'], -1) != '/') {
 } # if
 
 # Preferences lokaal niet meer toestaan
-if (isset($settings['prefs']['perpage']) || (isset($settings['prefs']['date_formatting']))) {
+if (isset($settings['prefs'])) {
 	throw new InvalidOwnSettingsSettingException("Preferences worden voortaan per user gezet");
 } # if
 
 # deprecated settings niet meer toestaan
 $ownsettingserror = '';
-$array = array('blacklist_url', 'cookie_expires', 'deny_robots', 'enable_stacktrace', 'enable_timing', 'external_blacklist', 'nntp_hdr', 'nntp_nzb', 'nntp_post', 'prefetch_image', 'prefetch_nzb', 'retention', 'retrieve_comments', 'retrieve_full', 'retrieve_full_comments', 'retrieve_increment', 'retrieve_newer_than', 'retrieve_reports', 'sendwelcomemail', 'spot_moderation');
+$array = array('blacklist_url', 'cookie_expires', 'deny_robots', 'enable_stacktrace', 'enable_timing', 'external_blacklist', 'nntp_hdr', 
+	'nntp_nzb', 'nntp_post', 'prefetch_image', 'prefetch_nzb', 'retention', 'retrieve_comments', 'retrieve_full', 'retrieve_full_comments', 
+	'retrieve_increment', 'retrieve_newer_than', 'retrieve_reports', 'sendwelcomemail', 'spot_moderation', 'allow_user_template', 
+	'auto_markasread', 'filters', 'index_filter', 'keep_downloadlist', 'keep_watchlist', 'nzb_search_engine', 'nzbhandling', 'show_multinzb',
+	'count_newspots', 'keep_seenlist', 'show_nzbbutton', 'show_updatebutton');
 foreach ($array as $value) {
 	if (isset($settings[$value])) {
-		$ownsettingserror .= $value . " has been removed from ownsettings.php" . PHP_EOL;
-	} # if
-} # foreach
-
-$array = array('allow_user_template', 'auto_markasread', 'filters', 'index_filter', 'keep_downloadlist', 'keep_watchlist', 'nzb_search_engine', 'nzbhandling', 'show_multinzb');
-foreach ($array as $value) {
-	if (isset($settings[$value])) {
-		$ownsettingserror .= $value . " has become an user preference" . PHP_EOL;
-	} # if
-} # foreach
-
-$array = array('count_newspots', 'keep_seenlist');
-foreach ($array as $value) {
-	if (isset($settings[$value])) {
-		$ownsettingserror .= $value . " is a user preference (and deniable using the user rights system)" . PHP_EOL;
-	} # if
-} # foreach
-
-$array = array('show_nzbbutton', 'show_updatebutton');
-foreach ($array as $value) {
-	if (isset($settings[$value])) {
-		$ownsettingserror .= $value . " has become an user right" . PHP_EOL;
+		$ownsettingserror .= ' * ' . $value . PHP_EOL;
 	} # if
 } # foreach
 
 if (!empty($ownsettingserror)) {
 	throw new InvalidOwnSettingsSettingException("Please remove " . $ownsettingserror . " from your 'ownsettings.php' file, this setting is set in the settings panel from within Spotweb itself");
+} # if
+
+# Make sure the template name in ownsettings.php doesn't end with a slash
+foreach($settings['templates'] as $x => $y) {
+	if (substr($y, -1) == '/') {
+		throw new InvalidOwnSettingsSettingException("Please remove the trailing slash for the template name " . $x . " in your ownsettings.php");
+	} # if
+} # if
+
+# Make sure the template name in ownsettings.php doesn't contain a path
+foreach($settings['templates'] as $x => $y) {
+	if (strpos($y, '/') !== false) {
+		throw new InvalidOwnSettingsSettingException("Please remove the path to the template " . $x . " in your ownsettings.php (only include the name)");
+	} # if
 } # if
 
 # Controleer op oud type quicklinks (zonder preference link)

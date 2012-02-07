@@ -1,5 +1,5 @@
 <?php
-class CustomTplHelper extends SpotTemplateHelper {
+class SpotTemplateHelper_We1rdo extends SpotTemplateHelper {
 
 	function cat2color($spot) {
 		switch( (int) $spot['category']) {
@@ -24,6 +24,37 @@ class CustomTplHelper extends SpotTemplateHelper {
 			return "red";
 		} # else
 	} # filter2cat
+
+	function getFilterIcons() {
+		return array(
+					'application'		=> _('Application'),
+					'bluray'			=> _('Blu-Ray'),
+					'book'				=> _('Book'),
+					'controller'		=> _('Game'),
+					'custom'			=> _('Plain'),
+					'divx'				=> _('DivX'),
+					'female'			=> _('Erotica'),
+					'film'				=> _('Movie'),
+					'hd'				=> _('HD'),
+					'ipod'				=> _('iPod'),
+					'linux'				=> _('Linux'),
+					'apple'				=> _('Apple'),
+					'mpg'				=> _('MPEG'),
+					'music'				=> _('Music'),
+					'nintendo_ds'		=> _('Nintendo DS'),
+					'nintendo_wii'		=> _('Nintendo Wii'),
+					'phone'				=> _('Phone'),
+					'picture'			=> _('Picture'),
+					'playstation'		=> _('Playstation'),
+					'tv'				=> _('TV'),
+					'vista'				=> _('Vista'),
+					'windows'			=> _('Windows'),
+					'wmv'				=> _('WMV'),
+					'xbox'				=> _('Xbox'),
+					'dvd'				=> _('DVD'),
+					'pda'				=> _('PDA')
+		);
+	} # getFilterIconList
 
 	function getSmileyList() {
 		return array('biggrin' => 'templates/we1rdo/smileys/biggrin.gif',
@@ -83,7 +114,7 @@ class CustomTplHelper extends SpotTemplateHelper {
 			case 'css'	: {
 				return array('js/dynatree/skin-vista/ui.dynatree.css',
 							 'templates/we1rdo/css/jquery-ui-1.8.13.custom.css',
-							 'css/spoticons.css',
+							 'templates/we1rdo/css/spoticons.css',
 							 'templates/we1rdo/css/style.css'
 							 );
 				break;
@@ -98,4 +129,4 @@ class CustomTplHelper extends SpotTemplateHelper {
 		return array();
 	} # getStaticFiles 
 	
-} # class CustomTplHelper
+} # class We1rdoTemplateHelper

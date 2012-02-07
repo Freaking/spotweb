@@ -35,7 +35,7 @@ if (($retrieve_newer_than = $this->_settings->get('retrieve_newer_than')) < 1254
 	<input type="hidden" name="editsettingsform[http_referer]" value="<?php echo $http_referer; ?>">
 	<input type="hidden" name="editsettingsform[buttonpressed]" value="">
 	
-	<div id="edituserpreferencetabs" class="ui-tabs">
+	<div id="editsettingstab" class="ui-tabs">
 		<ul>
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_view_spotweb_updates, '')) { ?>
 			<li><a href="?page=versioncheck" title="<?php echo _('Spotweb updates'); ?>"><span><?php echo _('Spotweb updates');?></span></a></li>
@@ -45,6 +45,7 @@ if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 			<li><a href="#editsettingstab-2"><span><?php echo _('Newsservers'); ?></span></a></li>
 			<li><a href="#editsettingstab-3"><span><?php echo _('Retrieve'); ?></span></a></li>
 			<li><a href="#editsettingstab-4"><span><?php echo _('Performance'); ?></span></a></li>
+			<li><a href="#editsettingstab-5"><span><?php echo _("Custom CSS"); ?></span></a></li>
 <?php } ?>
 		</ul>
 			
@@ -222,6 +223,20 @@ if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 				</dl>
 			</fieldset>
 		</div>
+
+<!-- Custom Stylesheet -->
+		<div id="editsettingstab-5" class="ui-tabs-hide">
+			<fieldset>
+				<dt>
+					<label for="editsettingsform[customcss]"><?php echo _('Use custom CSS?'); ?></label>
+				</dt>
+				<dd>
+					<textarea name="editsettingsform[customcss]" rows="15" cols="120"><?php echo htmlspecialchars($this->_settings->get('customcss')); ?></textarea>
+				</dd>
+			</fieldset>
+		</div>
+<!-- Einde Custom Stylesheet -->
+
 <?php } ?>
 
 <script>

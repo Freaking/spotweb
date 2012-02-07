@@ -1,5 +1,5 @@
 <?php
-define('SPOTDB_SCHEMA_VERSION', '0.54');
+define('SPOTDB_SCHEMA_VERSION', '0.55');
 
 class SpotDb {
 	private $_dbsettings = null;
@@ -623,7 +623,8 @@ class SpotDb {
 	 * Geeft een database engine specifieke text-match (bv. fulltxt search) query onderdeel terug
 	 */
 	function createTextQuery($fieldList) {
-		return $this->_conn->createTextQuery($fieldList);
+		$ftsEng = dbfts_abs::Factory($this->_conn);
+		return $ftsEng->createTextQuery($fieldList);
 	} # createTextQuery()
 
 	/*
@@ -1117,15 +1118,16 @@ class SpotDb {
 			$insertArray = array();
 
 			foreach($comments as $comment) {
-				$insertArray[] = vsprintf("('%s', '%s', %d)",
+				$insertArray[] = vsprintf("('%s', '%s', %d, %d)",
 						 Array($this->safe($comment['messageid']),
 							   $this->safe($comment['nntpref']),
-							   $this->safe($comment['rating'])));
+							   $this->safe($comment['rating']),
+							   $this->safe($comment['stamp'])));
 			} # foreach
 
 			# Actually insert the batch
 			if (!empty($insertArray)) {
-				$this->_conn->modify("INSERT INTO commentsxover(messageid, nntpref, spotrating)
+				$this->_conn->modify("INSERT INTO commentsxover(messageid, nntpref, spotrating, stamp)
 									  VALUES " . implode(',', $insertArray), array());
 			} # if
 		} # foreach
@@ -2079,6 +2081,7 @@ class SpotDb {
 	 */
 	function resetFilterCountForUser($userId) {
 		switch ($this->_dbsettings['engine']) {
+			case 'pdo_pgsql'	: 
 			case 'pdo_sqlite'	: {
 				$filterList = $this->_conn->arrayQuery("SELECT currentspotcount, filterhash FROM filtercounts WHERE userid = -1", array());
 				foreach($filterList as $filter) {
@@ -2092,18 +2095,6 @@ class SpotDb {
 				
 				break;
 			} # sqlite
-			
-			case 'pdo_pgsql'	: {
-				$this->_conn->modify("UPDATE filtercounts f
-											SET f.lastvisitspotcount = f.currentspotcount,
-												f.currentspotcount = t.currentspotcount
-											FROM filtercounts t
-											WHERE (f.filterhash = t.filterhash) 
-											  AND (t.userid = -1) 
-											  AND (f.userid = %d)",
-								Array((int) $userId) );
-				break;
-			} # pgsql
 
 			default				: {
 				$this->_conn->modify("UPDATE filtercounts f, filtercounts t

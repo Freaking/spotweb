@@ -6,6 +6,8 @@ abstract class SpotPage_Abs {
 	protected $_currentSession;
 	protected $_spotSec;
 	protected $_tplHelper;
+
+	protected $_templatePaths;
 	
 	function __construct(SpotDb $db, SpotSettings $settings, $currentSession) {
 		$this->_db = $db;
@@ -13,6 +15,15 @@ abstract class SpotPage_Abs {
 		$this->_currentSession = $currentSession;
 		$this->_spotSec = $currentSession['security'];
 		$this->_tplHelper = $this->getTplHelper(array());
+
+		/*
+		 * Create a list of paths where to look for template files in
+		 * the correct (last template first) order
+		 */
+		$this->_templatePaths = array('templates/' . $settings->get('tpl_name') . '/');
+		foreach($this->_tplHelper->getParentTemplates() as $parentTemplate) {
+			$this->_templatePaths[] = 'templates/' . $parentTemplate . '/';
+		} # foreach
 	} # ctor
 
 	/* 
@@ -53,13 +64,11 @@ abstract class SpotPage_Abs {
 	
 	# Geef the tpl helper terug
 	function getTplHelper($params) {
-		if (file_exists('templates/' . $this->_settings->get('tpl_name') . '/CustomTplHelper.php')) {
-			require_once 'templates/' . $this->_settings->get('tpl_name') . '/CustomTplHelper.php';
-			$tplHelper = new CustomTplHelper($this->_settings, $this->_currentSession, $this->_db, $params);
-		} else {
-			$tplHelper = new SpotTemplateHelper($this->_settings, $this->_currentSession, $this->_db, $params);
-		} # else
-		
+		$tplName = $this->_settings->get('tpl_name');
+
+		$className = 'SpotTemplateHelper_' . ucfirst($tplName);
+		$tplHelper = new $className($this->_settings, $this->_currentSession, $this->_db, $params);
+
 		return $tplHelper;
 	} # getTplHelper
 		
@@ -77,17 +86,21 @@ abstract class SpotPage_Abs {
 		# update the template helper variables
 		$this->_tplHelper->setParams($params);
 		
-		# We maken een aantal variabelen / objecten standaard beschikbaar in de template.
+		# Expose some variables to the template script in its local scope
 		$tplHelper = $this->_tplHelper;
 		$currentSession = $this->_currentSession;
 		$spotSec = $this->_currentSession['security'];
 
-		# stuur de expire headers
+		# send any expire headers
 		$this->sendExpireHeaders(true);
 		$this->sendContentTypeHeader('html');
 		
-		# en we spelen de template af
-		require_once('templates/' . $settings->get('tpl_name') . '/' . $tpl . '.inc.php');
+		# and include the template
+		foreach($this->_templatePaths as $tplPath) {
+			if (file_exists($tplPath . $tpl . '.inc.php')) {
+				require_once($tplPath . $tpl . '.inc.php');
+			} # if
+		} # foreach
 		SpotTiming::stop(__FUNCTION__ . ':' . $tpl, array($params));
 	} # template
 	

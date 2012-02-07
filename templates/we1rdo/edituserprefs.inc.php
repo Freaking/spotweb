@@ -1,30 +1,45 @@
 <?php
 $pagetitle = _('Change user preferences');
 
-if (!empty($edituserprefsresult)) {
-	//include 'includes/form-xmlresult.inc.php';
-	//echo formResult2Xml($edituserprefsresult, $formmessages, $tplHelper);
-	
-	if ($edituserprefsresult['result'] == 'success') {
-		$tplHelper->redirect($http_referer);
+/* If we run embedded in a dialog, dont run the HTML header as that messes up things */
+if (!$dialogembedded) {
+
+	/* Redirect to the callingpage */
+	if (!empty($edituserprefsresult)) {
+		if ($edituserprefsresult['result'] == 'success') {
+			$tplHelper->redirect($http_referer);
+
+			return ;
+		} # if
+	} # if
+
+	require "includes/header.inc.php";
+	echo '</div>';
+} else {
+	/* Return the XML result */
+	if (!empty($edituserprefsresult)) {
+		include 'includes/form-xmlresult.inc.php';
+		echo formResult2Xml($edituserprefsresult, $formmessages, $tplHelper);
+
 		return ;
 	} # if
 } # if
-
-require "includes/header.inc.php";
 include "includes/form-messages.inc.php";
 
-?>
-</div>
+if (!$dialogembedded) { ?>
 	<div id='toolbar'>
 		<div class="closeuserpreferences"><p><a class='toggle' href='<?php echo $tplHelper->makeBaseUrl('path');?>'><?php echo _('Back to mainview'); ?></a></p>
 		</div>
 	</div>
+<?php } ?>
 <form class="edituserprefsform" name="edituserprefsform" action="<?php echo $tplHelper->makeEditUserPrefsAction(); ?>" method="post" enctype="multipart/form-data">
 	<input type="hidden" name="edituserprefsform[xsrfid]" value="<?php echo $tplHelper->generateXsrfCookie('edituserprefsform'); ?>">
 	<input type="hidden" name="edituserprefsform[http_referer]" value="<?php echo $http_referer; ?>">
 	<input type="hidden" name="edituserprefsform[buttonpressed]" value="">
-	<input type="hidden" name="userid" value="<?php echo $spotuser['userid']; ?>">
+	<input type="hidden" name="userid" value="<?php echo htmlspecialchars($spotuser['userid']); ?>">
+<?php if ($dialogembedded) { ?>
+	<input type="hidden" name="dialogembedded" value="1">
+<?php } ?>
 	
 	<div id="edituserpreferencetabs" class="ui-tabs">
 		<ul>
@@ -33,7 +48,9 @@ include "includes/form-messages.inc.php";
 			<li><a href="#edituserpreftab-2"><span><?php echo _('NZB handeling'); ?></span></a></li>
 <?php } ?>
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_keep_own_filters, '')) { ?>
+	<?php if (!$dialogembedded) { ?>
 			<li><a href="?page=render&tplname=listfilters" title="<?php echo _('Filters'); ?>"><span><?php echo _('Filters'); ?></span></a></li>
+	<?php } ?>
 <!--
 			<li><a href="?page=render&tplname=cat2dlmapping" title="<?php echo _('Download categories'); ?>"><span><?php echo _('Download categories'); ?></span></a></li>
 -->
@@ -48,7 +65,9 @@ include "includes/form-messages.inc.php";
 			<li><a href="#edituserpreftab-6"><span><?php echo _('Posting of spots'); ?></span></a></li>
 <?php } ?>
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_blacklist_spotter, '')) { ?>
+	<?php if (!$dialogembedded) { ?>
 			<li><a href="?page=render&tplname=editspotterblacklist" title="<?php echo _('Blacklist spotter'); ?>"><span><?php echo _('Blacklist spotter'); ?></span></a></li>
+	<?php } ?>
 <?php } ?>
 	
 		</ul>
@@ -275,7 +294,7 @@ include "includes/form-messages.inc.php";
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_send_notifications_services, 'email')) { ?>
 <!-- E-mail -->
 			<fieldset>
-				<dt><label for="use_email"><?php echo _('Send e-mail to') . ' ' . $currentSession['user']['mail']; ?>?</label></dt>
+				<dt><label for="use_email"><?php echo _('Send e-mail to') . ' ' . $spotuser['mail']; ?>?</label></dt>
 				<dd><input type="checkbox" class="enabler" name="edituserprefsform[notifications][email][enabled]" id="use_email" <?php if ($edituserprefsform['notifications']['email']['enabled']) { echo 'checked="checked"'; } ?>></dd>
 
 				<fieldset id="content_use_email" class="notificationSettings">
@@ -411,7 +430,9 @@ include "includes/form-messages.inc.php";
 
 		<div class="editprefsButtons">
 			<input class="greyButton" type="submit" name="edituserprefsform[submitedit]" value="<?php echo _('Change'); ?>">
+<?php if (!$dialogembedded) { ?>
 			<input class="greyButton" type="submit" name="edituserprefsform[submitcancel]" value="<?php echo _('Cancel'); ?>">
+<?php } ?>
 			<div class="clear"></div>
 		</div>
 	</div>
@@ -478,4 +499,6 @@ include "includes/form-messages.inc.php";
 		echo "</fieldset>" . PHP_EOL;
 	} # notificationOptions
 
+if (!$dialogembedded) {
 	require_once "includes/footer.inc.php";
+} # if

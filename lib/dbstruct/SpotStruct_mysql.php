@@ -157,10 +157,11 @@ class SpotStruct_mysql extends SpotStruct_abs {
 
 			# change the collation to a MySQL type
 			switch(strtolower($collation)) {
-				case 'utf8'		: $colSetting = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci'; break;
-				case 'ascii'	: $colSetting = 'CHARACTER SET ascii'; break;
-				case ''			: $colSetting = ''; break;
-				default			: throw new Exception("Invalid collation setting");
+				case 'utf8'			: $colSetting = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci'; break;
+				case 'ascii'		: $colSetting = 'CHARACTER SET ascii'; break;
+				case 'ascii_bin'	: $colSetting = 'CHARACTER SET ascii COLLATE ascii_bin'; break;
+				case ''				: $colSetting = ''; break;
+				default				: throw new Exception("Invalid collation setting");
 			} # switch
 			
 			# and define the 'NOT NULL' part
@@ -186,10 +187,11 @@ class SpotStruct_mysql extends SpotStruct_abs {
 
 		# change the collation to a MySQL type
 		switch(strtolower($collation)) {
-			case 'utf8'		: $colSetting = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci'; break;
-			case 'ascii'	: $colSetting = 'CHARACTER SET ascii'; break;
-			case ''			: $colSetting = ''; break;
-			default			: throw new Exception("Invalid collation setting");
+			case 'utf8'			: $colSetting = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci'; break;
+			case 'ascii'		: $colSetting = 'CHARACTER SET ascii'; break;
+			case 'ascii_bin'	: $colSetting = 'CHARACTER SET ascii COLLATE ascii_bin'; break;
+			case ''				: $colSetting = ''; break;
+			default				: throw new Exception("Invalid collation setting");
 		} # switch
 		
 		# and define the 'NOT NULL' part
@@ -311,7 +313,22 @@ class SpotStruct_mysql extends SpotStruct_abs {
 					} # if
 				} # if
 			} # if
-			
+
+			/*
+			 * We do not properly distinguish between character sets and
+			 * collations in the spotweb system, so we mangle them a bit
+			 */
+			if (is_string($q['COLLATION_NAME'])) {
+				switch($q['COLLATION_NAME']) {
+					case 'ascii_general_ci'		: $q['COLLATION_NAME'] = 'ascii'; break;
+					case 'ascii_bin'			: $q['COLLATION_NAME'] = 'ascii_bin'; break;
+					case 'utf8_unicode_ci'		: $q['COLLATION_NAME'] = 'utf8'; break;
+					case 'utf8_general_ci'		: $q['COLLATION_NAME'] = 'utf8'; break;
+
+					default 					: throw new Exception("Invalid collation setting for varchar: " . $q['COLLATION_NAME']);
+				} # switch
+			} # if
+
 			# a default value has to given, so make it compareable to what we define
 			if ((strlen($q['COLUMN_DEFAULT']) == 0) && (is_string($q['COLUMN_DEFAULT']))) {	
 				$q['COLUMN_DEFAULT'] = "''";

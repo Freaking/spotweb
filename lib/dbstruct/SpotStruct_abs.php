@@ -174,7 +174,10 @@ abstract class SpotStruct_abs {
 		} # if
 
 		# Chcek character set setting
-		if ((strtolower($q['CHARACTER_SET_NAME']) != $collation) && ($q['CHARACTER_SET_NAME'] != null)) {
+		if ((strtolower($q['COLLATION_NAME']) != $collation) && ($q['COLLATION_NAME'] != null)) {
+			# var_dump($q);
+			# var_dump($collation);
+			# die();
 			return 'charset';
 		} # if
 		
@@ -332,7 +335,7 @@ abstract class SpotStruct_abs {
 		$this->validateColumn('commentcount', 'spots', 'INTEGER', "0", false, '');
 		$this->validateColumn('spotrating', 'spots', 'INTEGER', "0", false, '');
 		$this->validateColumn('reportcount', 'spots', 'INTEGER', "0", false, '');
-		$this->validateColumn('spotterid', 'spots', 'VARCHAR(32)', NULL, false, 'ascii'); 
+		$this->validateColumn('spotterid', 'spots', 'VARCHAR(32)', NULL, false, 'ascii_bin'); 
 		$this->alterStorageEngine("spots", "MyISAM");
 		
 		# ---- spotsfull table ---- #
@@ -360,6 +363,7 @@ abstract class SpotStruct_abs {
 		$this->validateColumn('nntpref', 'commentsxover', 'VARCHAR(128)', "''", true, 'ascii');
 		$this->validateColumn('spotrating', 'commentsxover', 'INTEGER', "0", false, '');
 		$this->validateColumn('moderated', 'commentsxover', 'BOOLEAN', NULL, false, '');
+		$this->validateColumn('stamp', 'commentsxover', 'UNSIGNED INTEGER', NULL, false, '');
 		$this->alterStorageEngine("commentsxover", "InnoDB");
 
 		# ---- reportsxover table ---- #
@@ -386,7 +390,7 @@ abstract class SpotStruct_abs {
 		$this->validateColumn('stamp', 'commentsfull', 'INTEGER', NULL, false, '');
 		$this->validateColumn('usersignature', 'commentsfull', 'VARCHAR(255)', NULL, false, 'ascii'); 
 		$this->validateColumn('userkey', 'commentsfull', 'VARCHAR(512)', NULL, false, 'ascii'); 
-		$this->validateColumn('spotterid', 'commentsfull', 'VARCHAR(32)', NULL, false, 'ascii'); 
+		$this->validateColumn('spotterid', 'commentsfull', 'VARCHAR(32)', NULL, false, 'ascii_bin'); 
 		$this->validateColumn('hashcash', 'commentsfull', 'VARCHAR(255)', NULL, false, 'ascii'); 
 		$this->validateColumn('body', 'commentsfull', 'TEXT', NULL, false, 'utf8');
 		$this->validateColumn('verified', 'commentsfull', 'BOOLEAN', NULL, false, '');
@@ -523,7 +527,7 @@ abstract class SpotStruct_abs {
 
 		# ---- spotteridblacklist table ---- #
 		$this->createTable('spotteridblacklist', "utf8");
-		$this->validateColumn('spotterid', 'spotteridblacklist', 'VARCHAR(32)', NULL, false, 'ascii');
+		$this->validateColumn('spotterid', 'spotteridblacklist', 'VARCHAR(32)', NULL, false, 'ascii_bin');
 		$this->validateColumn('ouruserid', 'spotteridblacklist', 'INTEGER', "0", true, '');
 		$this->validateColumn('origin', 'spotteridblacklist', 'VARCHAR(255)', NULL, false, 'ascii');
 		$this->alterStorageEngine("spotteridblacklist", "InnoDB");

@@ -12,6 +12,7 @@
 				<th><?php echo _('Last visit'); ?></th>
 				<th><?php echo _('Member of group'); ?></th>
 				<th><?php echo _('IP address of last visit'); ?></th>
+				<th><?php echo _('Edit preferences'); ?></th>
 			</tr>
 		</thead>
 		<tbody id="userlist">
@@ -30,7 +31,7 @@
 			# dit maakt het simpeler om te zien welke rechten een user heeft
 			if ($group['ismember']) {
 				if ($allow_edit_groupMembership) {
-					$groupList .= '<a href="" onclick="return openDialog(\'editdialogdiv\', \'' . _('Change group') . '\', \'?page=editsecgroup&groupid=' . $group['id'] . '\', \'editsecgroupform\', null, \'reload\', function() { refreshTab(\'usermanagementtabs\')}); ">' . $group['name'] . '</a>, ';
+					$groupList .= '<a href="" onclick="return openDialog(\'editdialogdiv\', \'' . _('Change group') . '\', \'?page=editsecgroup&groupid=' . $group['id'] . '\', \'editsecgroupform\', null, \'reload\', function() { refreshTab(\'usermanagementtabs\')}, null); ">' . $group['name'] . '</a>, ';
 				} elseif ($allow_display_groupMembership) { 
 					$groupList .= $group['name'] . ', ';
 				} # if
@@ -40,11 +41,11 @@
 		# en wis de laatste comma en spatie
 		$groupList = substr($groupList, 0, -2);
 ?>
-				<tr> 
-					<td> 
+			<tr> 
+				<td> 
 <?php 
 		echo '<a href="' . $tplHelper->makeEditUserUrl($user['userid'], 'edit') . '" ' .
-				'onclick="return openDialog(\'editdialogdiv\', \'' . _('Change user') . '\', \'?page=edituser&userid=' . $user['userid'] . '\', \'edituserform\', null, \'autoclose\', function() { refreshTab(\'usermanagementtabs\')}); ">' .
+				'onclick="return openDialog(\'editdialogdiv\', \'' . _('Change user') . '\', \'?page=edituser&userid=' . $user['userid'] . '\', \'edituserform\', null, \'autoclose\', function() { refreshTab(\'usermanagementtabs\')}, null); ">' .
 				 $user['username'] . '</a>'; 
 ?> 
 				</td>
@@ -54,11 +55,16 @@
 				<td> <?php echo $tplHelper->formatDate($user['lastvisit'], 'userlist'); ?> </td>
 				<td> <?php echo $groupList; ?> </td>
 				<td> <?php echo $user['lastipaddr']; ?> </td>
-			</tr>
+				<td> 
+<?php 
+		echo '<a href="' . $tplHelper->makeEditUserUrl($user['userid'], 'edit') . '" ' .
+				'onclick="return openDialog(\'editdialogdiv\', \'' . vsprintf(_('Editting user preferences for \\\'%s\\\''), $user['username']) . '\', \'?page=edituserprefs&userid=' . $user['userid'] . '&dialogembedded=1\', \'edituserprefsform\', null, \'autoclose\', function() { refreshTab(\'usermanagementtabs\')}, function() { initializeUserPreferencesScreen(); }); "><span class="ui-icon ui-icon-pencil"></span></a>'; 
+?> 
+				</td>
+		</tr>
 <?php
 	}
 ?>
 		</tbody>
 	</table>
 
-	

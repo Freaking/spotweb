@@ -27,14 +27,17 @@ class SpotUserSystem {
 	/*
 	 * Create a new session for the userid
 	 */
-	private function createNewSession($userid) {
+	public function createNewSession($userid) {
 		# If this is an actual user, we need to have the user record
 		$tmpUser = $this->getUser($userid);
 		
 		/*
 		 * If this is an anonymous user, or if the user has never
 		 * logged in before, the last visit time is always the 
-		 * session creation time
+		 * session creation time.
+		 *
+		 * We do not use the 'nonauthencated_userid' for this because
+		 * it would result in loss of read data for single-user systems
 		 */
 		if (($userid == SPOTWEB_ANONYMOUS_USERID) || ($tmpUser['lastlogin'] == 0)) {
 			$tmpUser['lastvisit'] = time();
@@ -291,6 +294,26 @@ class SpotUserSystem {
 	} # validSession
 	
 	/*
+	 * Is this user allowed to post content like spam reports etc?
+	 */
+	function allowedToPost($user) {
+		/*
+		 * When an invalid (reserved) username is used, prevent
+		 * posting 
+		 */
+		if (!$this->validUsername($user['username'])) {
+			return false;
+		} # if
+
+		# Als de user niet ingelogged is, dan heeft dit geen zin
+		if ($user['userid'] <= SPOTWEB_ADMIN_USERID) {
+			return false;
+		} # if
+
+		return true;
+	} # allowedToPost
+
+	/*
 	 * Validates a username
 	 */
 	function validUsername($user) {
@@ -329,7 +352,7 @@ class SpotUserSystem {
 		 * Now copy the preferences from the anonymous user to this
 		 * new user 
 		 */
-		$anonUser = $this->_db->getUser(SPOTWEB_ANONYMOUS_USERID);
+		$anonUser = $this->_db->getUser($this->_settings->get('nonauthenticated_userid'));
 		$tmpUser = array_merge($anonUser, $tmpUser);
 		$tmpUser['prefs']['newspotdefault_tag'] = $user['username'];
 		$this->_db->setUser($tmpUser);
@@ -338,7 +361,7 @@ class SpotUserSystem {
 		$this->_db->setUserGroupList($tmpUser['userid'], $this->_settings->get('newuser_grouplist'));
 		
 		# now copy the users' filters to the new user
-		$this->_db->copyFilterList(SPOTWEB_ANONYMOUS_USERID, $tmpUser['userid']);
+		$this->_db->copyFilterList($this->_settings->get('nonauthenticated_userid'), $tmpUser['userid']);
 	} # addUser()
 
 	/*
@@ -349,7 +372,7 @@ class SpotUserSystem {
 	} # setUserGroupList
 	 
 	/*
-	 * Update a user's password
+	 * Update a userid's password
 	 */
 	function setUserPassword($user) {
 		# Convert the password to an passhash
@@ -564,8 +587,15 @@ class SpotUserSystem {
 			$errorList[] = _('Not a valid lastname');
 		} # if
 
-		# Make sure a psasword is entered
-		if (strlen($user['newpassword1']) < 5){
+		# Make sure a valid password is entered for existing users
+		if ((strlen($user['newpassword1'] > 0)) && ($isEdit)) {
+			if (strlen($user['newpassword1']) < 5){
+				$errorList[] = _('Entered password is too short');
+			} # if
+		} # if
+
+		# Make sure a valid password is entered for new users
+		if ((strlen($user['newpassword1'] < 5)) && (!$isEdit)) {
 			$errorList[] = _('Entered password is too short');
 		} # if
 
@@ -836,14 +866,14 @@ class SpotUserSystem {
 	
 	/*
 	 * Removes all existing filters for a user, and reset its
-	 * filerlist to the one for the 'ANONYMOUS' account
+	 * filerlist to the one for the system defined anonymous account
 	 */
 	function resetFilterList($userId) {
 		# Remove all filters
 		$this->_db->removeAllFilters($userId);
 		
 		# and copy them back from the userlist
-		$this->_db->copyFilterList(SPOTWEB_ANONYMOUS_USERID, $userId);
+		$this->_db->copyFilterList($this->_settings->get('nonauthenticated_userid'), $userId);
 	} # resetFilterList
 
 	/*
@@ -865,10 +895,10 @@ class SpotUserSystem {
 	 */
 	function setFiltersAsDefault($userId) {
 		# Remove all filters for the Anonymous user
-		$this->_db->removeAllFilters(SPOTWEB_ANONYMOUS_USERID);
+		$this->_db->removeAllFilters($this->_settings->get('nonauthenticated_userid'));
 		
 		# and copy them from the specified user to anonymous
-		$this->_db->copyFilterList($userId, SPOTWEB_ANONYMOUS_USERID);
+		$this->_db->copyFilterList($userId, $this->_settings->get('nonauthenticated_userid'));
 	} # setFiltersAsDefault
 
 	/*

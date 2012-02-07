@@ -327,6 +327,9 @@ msgstr "IP address van laatste bezoek"
 msgid "Change user"
 msgstr "Wijzig gebruiker"
 
+msgid "Edit preferences"
+msgstr "Wijzig voorkeuren"
+
 #: spotinfo.inc.php
 msgid "This spot is not verified, the name of the sender has not been confirmed"
 msgstr "Deze spot is niet geverifi&euml;erd, de naam van de poster is niet bevestigd!"
@@ -1230,6 +1233,9 @@ msgstr "Een gebruiker moet in minstens &eacute;&eacute;n groep zitten"
 msgid "User %s cannot be found"
 msgstr "Gebruiker %s kan niet gevonden worden"
 
+msgid "Editting user preferences for '%s'"
+msgstr "Gebruikersvoorkeuren wijzigen voor '%s'"
+
 #: SpotPage_postspot.php
 msgid "Please select NZB file"
 msgstr "Geen NZB bestand opgegeven"
@@ -1768,5 +1774,5 @@ msgstr "Oorsprong"
 msgid "Remove spotterid"
 msgstr "Spotterid verwijderen"
 
-
-
+msgid "%s commented earlier:"
+msgstr "%s schreef eerder:"
